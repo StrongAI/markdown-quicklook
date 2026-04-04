@@ -63,7 +63,16 @@ struct MarkdownToHTML: MarkupVisitor {
   }
 
   mutating func visitListItem(_ listItem: ListItem) -> String {
-    "<li>" + content(of: listItem) + "</li>\n"
+    let checkbox: String
+    switch listItem.checkbox {
+    case .checked:
+      checkbox = "&#9745; "
+    case .unchecked:
+      checkbox = "&#9744; "
+    case nil:
+      checkbox = ""
+    }
+    return "<li>" + checkbox + content(of: listItem) + "</li>\n"
   }
 
   // MARK: - Tables
@@ -177,17 +186,17 @@ struct MarkdownToHTML: MarkupVisitor {
     <body style="font-family: -apple-system, sans-serif; font-size: 14px; \
     line-height: 1.6; color: \(c.text); background-color: \(c.bg);">
     <style>
-    body { margin: 0; padding: 0; }
+    body { margin: 0; padding: 20px; }
     h1 { font-size: 28px; font-weight: 600; border-bottom: 1px solid \(c.border); \
-    padding-bottom: 8px; margin-top: 24px; margin-bottom: 16px; }
+    padding-bottom: 8px; margin-top: 12px; margin-bottom: 8px; }
     h2 { font-size: 22px; font-weight: 600; border-bottom: 1px solid \(c.border); \
-    padding-bottom: 8px; margin-top: 24px; margin-bottom: 16px; }
-    h3 { font-size: 18px; font-weight: 600; margin-top: 24px; margin-bottom: 16px; }
-    h4 { font-size: 16px; font-weight: 600; margin-top: 24px; margin-bottom: 16px; }
-    h5 { font-size: 14px; font-weight: 600; margin-top: 24px; margin-bottom: 16px; }
-    h6 { font-size: 13px; font-weight: 600; margin-top: 24px; margin-bottom: 16px; \
+    padding-bottom: 8px; margin-top: 12px; margin-bottom: 8px; }
+    h3 { font-size: 18px; font-weight: 600; margin-top: 12px; margin-bottom: 8px; }
+    h4 { font-size: 16px; font-weight: 600; margin-top: 12px; margin-bottom: 8px; }
+    h5 { font-size: 14px; font-weight: 600; margin-top: 12px; margin-bottom: 8px; }
+    h6 { font-size: 13px; font-weight: 600; margin-top: 12px; margin-bottom: 8px; \
     color: \(c.muted); }
-    p { margin-top: 0; margin-bottom: 16px; }
+    p { margin-top: 0; margin-bottom: 10px; }
     a { color: \(c.link); }
     code { font-family: 'SF Mono', Menlo, monospace; font-size: 12px; \
     background-color: \(c.codeBg); padding: 2px 6px; }

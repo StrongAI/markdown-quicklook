@@ -1,31 +1,14 @@
 #if os(macOS)
 import Cocoa
 import QuickLookUI
-#else
-import UIKit
-import QuickLook
-#endif
+import WebKit
 
-#if os(macOS)
 final class PreviewViewController: NSViewController, QLPreviewingController {
-  private lazy var scrollView: NSScrollView = {
-    let sv = NSScrollView()
-    sv.hasVerticalScroller = true
-    sv.hasHorizontalScroller = false
-    sv.autohidesScrollers = true
-    sv.drawsBackground = true
-    sv.backgroundColor = .textBackgroundColor
-    return sv
-  }()
-
-  private lazy var textView: NSTextView = {
-    let tv = NSTextView()
-    tv.isEditable = false
-    tv.isSelectable = true
-    tv.drawsBackground = true
-    tv.backgroundColor = .textBackgroundColor
-    tv.textContainerInset = NSSize(width: 20, height: 20)
-    return tv
+  private lazy var webView: WKWebView = {
+    let config = WKWebViewConfiguration()
+    let wv = WKWebView(frame: .zero, configuration: config)
+    wv.setValue(false, forKey: "drawsBackground")
+    return wv
   }()
 
   override func loadView() {
@@ -34,20 +17,9 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    view.wantsLayer = true
-    view.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
-    scrollView.documentView = textView
-    view.addSubview(scrollView)
-  }
-
-  override func viewDidLayout() {
-    super.viewDidLayout()
-    scrollView.frame = view.bounds
-    let contentWidth = max(view.bounds.width - 40, 100)
-    textView.minSize = NSSize(width: contentWidth, height: 0)
-    textView.maxSize = NSSize(width: contentWidth, height: .greatestFiniteMagnitude)
-    textView.textContainer?.containerSize = NSSize(width: contentWidth, height: .greatestFiniteMagnitude)
-    textView.textContainer?.widthTracksTextView = false
+    webView.frame = view.bounds
+    webView.autoresizingMask = [.width, .height]
+    view.addSubview(webView)
   }
 
   func preparePreviewOfFile(at url: URL) async throws {
@@ -56,24 +28,8 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
     let markdown = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) ?? ""
 
     let dark = view.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-    let bgColor: NSColor = dark
-      ? NSColor(red: 0.118, green: 0.118, blue: 0.118, alpha: 1)
-      : .textBackgroundColor
-    scrollView.backgroundColor = bgColor
-    textView.backgroundColor = bgColor
-    view.layer?.backgroundColor = bgColor.cgColor
-
     let html = renderedHTML(for: markdown, isDarkMode: dark)
-    let htmlData = Data(html.utf8)
-
-    if let attrString = NSAttributedString(
-      html: htmlData,
-      documentAttributes: nil
-    ) {
-      textView.textStorage?.setAttributedString(attrString)
-    } else {
-      textView.string = markdown
-    }
+    webView.loadHTMLString(html, baseURL: fileURL.deletingLastPathComponent())
   }
 
   private func textFileURL(of url: URL) -> URL {
@@ -91,21 +47,22 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
 #else
 import UIKit
 import QuickLook
+import WebKit
 
 final class PreviewViewController: UIViewController, QLPreviewingController {
-  private lazy var textView: UITextView = {
-    let tv = UITextView()
-    tv.isEditable = false
-    tv.isSelectable = true
-    tv.contentInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
-    return tv
+  private lazy var webView: WKWebView = {
+    let config = WKWebViewConfiguration()
+    let wv = WKWebView(frame: .zero, configuration: config)
+    wv.isOpaque = false
+    wv.backgroundColor = .clear
+    return wv
   }()
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    textView.frame = view.bounds
-    textView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    view.addSubview(textView)
+    webView.frame = view.bounds
+    webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    view.addSubview(webView)
   }
 
   func preparePreviewOfFile(at url: URL) async throws {
@@ -115,18 +72,7 @@ final class PreviewViewController: UIViewController, QLPreviewingController {
 
     let dark = traitCollection.userInterfaceStyle == .dark
     let html = renderedHTML(for: markdown, isDarkMode: dark)
-    let htmlData = Data(html.utf8)
-
-    if let attrString = try? NSAttributedString(
-      data: htmlData,
-      options: [.documentType: NSAttributedString.DocumentType.html,
-                .characterEncoding: String.Encoding.utf8.rawValue],
-      documentAttributes: nil
-    ) {
-      textView.attributedText = attrString
-    } else {
-      textView.text = markdown
-    }
+    webView.loadHTMLString(html, baseURL: fileURL.deletingLastPathComponent())
   }
 
   private func textFileURL(of url: URL) -> URL {
