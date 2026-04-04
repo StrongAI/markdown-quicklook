@@ -107,34 +107,19 @@ export function renderMarkdown(markdown: string): string {
   return mdit.render(markdown);
 }
 
-export function assembleHtml(renderedBody: string): string {
-  const stylify = (css: string) => `<style>\n${css}\n</style>`;
-  const components = [
-    '<!doctype html><html lang="en"><head><meta charset="UTF-8" /></head><body>',
-    `<div class="markdown-body">\n${renderedBody}\n</div>`,
-    stylify(coreCss(THEME, COLOR_SCHEME)),
-    stylify(previewThemeCss(THEME, COLOR_SCHEME)),
-    stylify(alertsCss(COLOR_SCHEME)),
-    stylify(codeCopyCss(COLOR_SCHEME)),
-    stylify(hljsCss(COLOR_SCHEME)),
-    stylify(katexCss),
-    mermaidScript(),
-    '</body></html>',
+export function injectStyles(): void {
+  const sheets = [
+    coreCss(THEME, COLOR_SCHEME),
+    previewThemeCss(THEME, COLOR_SCHEME),
+    alertsCss(COLOR_SCHEME),
+    codeCopyCss(COLOR_SCHEME),
+    hljsCss(COLOR_SCHEME),
+    katexCss,
   ];
 
-  return components.join('\n');
-}
-
-function mermaidScript(): string {
-  return `
-  <script type="module">
-    import mermaid from "https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.esm.min.mjs";
-    const darkMode = matchMedia("(prefers-color-scheme: dark)");
-    mermaid.initialize({ theme: darkMode.matches ? "dark" : undefined });
-    darkMode.addEventListener("change", () => {
-      if (document.querySelector(".mermaid") !== null) {
-        location.reload();
-      }
-    });
-  </script>`;
+  for (const css of sheets) {
+    const style = document.createElement('style');
+    style.textContent = css;
+    document.head.appendChild(style);
+  }
 }

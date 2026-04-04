@@ -5,17 +5,27 @@ import QuickLookUI
 import UIKit
 import QuickLook
 #endif
-import WebKit
 
 #if os(macOS)
 final class PreviewViewController: NSViewController, QLPreviewingController {
-  private var appearanceObservation: NSKeyValueObservation?
+  private lazy var scrollView: NSScrollView = {
+    let sv = NSScrollView()
+    sv.hasVerticalScroller = true
+    sv.hasHorizontalScroller = false
+    sv.autohidesScrollers = true
+    sv.drawsBackground = true
+    sv.backgroundColor = .textBackgroundColor
+    return sv
+  }()
 
-  private lazy var webView: WKWebView = {
-    let config = WKWebViewConfiguration()
-    let webView = WKWebView(frame: .zero, configuration: config)
-    webView.allowsMagnification = true
-    return webView
+  private lazy var textView: NSTextView = {
+    let tv = NSTextView()
+    tv.isEditable = false
+    tv.isSelectable = true
+    tv.drawsBackground = true
+    tv.backgroundColor = .textBackgroundColor
+    tv.textContainerInset = NSSize(width: 20, height: 20)
+    return tv
   }()
 
   override func loadView() {
@@ -25,47 +35,45 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
   override func viewDidLoad() {
     super.viewDidLoad()
     view.wantsLayer = true
-    view.addSubview(webView)
-    view.layer?.masksToBounds = true
-    view.layer?.cornerRadius = 6
-
-    updateBackgroundColor()
-
-    appearanceObservation = NSApp.observe(\.effectiveAppearance) { [weak self] _, _ in
-      guard let self else { return }
-      Task { @MainActor in
-        self.updateBackgroundColor()
-      }
-    }
+    view.layer?.backgroundColor = NSColor.textBackgroundColor.cgColor
+    scrollView.documentView = textView
+    view.addSubview(scrollView)
   }
 
   override func viewDidLayout() {
     super.viewDidLayout()
-    webView.frame = view.bounds
+    scrollView.frame = view.bounds
+    let contentWidth = max(view.bounds.width - 40, 100)
+    textView.minSize = NSSize(width: contentWidth, height: 0)
+    textView.maxSize = NSSize(width: contentWidth, height: .greatestFiniteMagnitude)
+    textView.textContainer?.containerSize = NSSize(width: contentWidth, height: .greatestFiniteMagnitude)
+    textView.textContainer?.widthTracksTextView = false
   }
 
   func preparePreviewOfFile(at url: URL) async throws {
     let fileURL = textFileURL(of: url)
     let data = try Data(contentsOf: fileURL)
     let markdown = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) ?? ""
-    let html = renderedHTML(for: markdown)
-    webView.loadHTMLString(html, baseURL: nil)
-  }
 
-  private var isDarkMode: Bool {
-    switch NSApp.effectiveAppearance.name {
-    case .darkAqua, .vibrantDark, .accessibilityHighContrastDarkAqua, .accessibilityHighContrastVibrantDark:
-      return true
-    default:
-      return false
+    let dark = view.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
+    let bgColor: NSColor = dark
+      ? NSColor(red: 0.118, green: 0.118, blue: 0.118, alpha: 1)
+      : .textBackgroundColor
+    scrollView.backgroundColor = bgColor
+    textView.backgroundColor = bgColor
+    view.layer?.backgroundColor = bgColor.cgColor
+
+    let html = renderedHTML(for: markdown, isDarkMode: dark)
+    let htmlData = Data(html.utf8)
+
+    if let attrString = NSAttributedString(
+      html: htmlData,
+      documentAttributes: nil
+    ) {
+      textView.textStorage?.setAttributedString(attrString)
+    } else {
+      textView.string = markdown
     }
-  }
-
-  private func updateBackgroundColor() {
-    view.layer?.backgroundColor = (isDarkMode
-      ? NSColor(red: 13.0 / 255, green: 17.0 / 255, blue: 22.0 / 255, alpha: 1)
-      : NSColor.white
-    ).cgColor
   }
 
   private func textFileURL(of url: URL) -> URL {
@@ -81,26 +89,44 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
 }
 
 #else
+import UIKit
+import QuickLook
+
 final class PreviewViewController: UIViewController, QLPreviewingController {
-  private lazy var webView: WKWebView = {
-    let config = WKWebViewConfiguration()
-    let webView = WKWebView(frame: .zero, configuration: config)
-    return webView
+  private lazy var textView: UITextView = {
+    let tv = UITextView()
+    tv.isEditable = false
+    tv.isSelectable = true
+    tv.contentInset = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
+    return tv
   }()
 
   override func viewDidLoad() {
     super.viewDidLoad()
-    webView.frame = view.bounds
-    webView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
-    view.addSubview(webView)
+    textView.frame = view.bounds
+    textView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
+    view.addSubview(textView)
   }
 
   func preparePreviewOfFile(at url: URL) async throws {
     let fileURL = textFileURL(of: url)
     let data = try Data(contentsOf: fileURL)
     let markdown = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) ?? ""
-    let html = renderedHTML(for: markdown)
-    webView.loadHTMLString(html, baseURL: nil)
+
+    let dark = traitCollection.userInterfaceStyle == .dark
+    let html = renderedHTML(for: markdown, isDarkMode: dark)
+    let htmlData = Data(html.utf8)
+
+    if let attrString = try? NSAttributedString(
+      data: htmlData,
+      options: [.documentType: NSAttributedString.DocumentType.html,
+                .characterEncoding: String.Encoding.utf8.rawValue],
+      documentAttributes: nil
+    ) {
+      textView.attributedText = attrString
+    } else {
+      textView.text = markdown
+    }
   }
 
   private func textFileURL(of url: URL) -> URL {
@@ -119,18 +145,8 @@ final class PreviewViewController: UIViewController, QLPreviewingController {
 // MARK: - Shared Rendering
 
 extension PreviewViewController {
-  func renderedHTML(for markdown: String) -> String {
-    guard let templateURL = Bundle(for: Self.self).url(forResource: "index", withExtension: "html"),
-          let template = try? String(contentsOf: templateURL, encoding: .utf8) else {
-      return "<html><body><pre>\(markdown)</pre></body></html>"
-    }
-
-    // Escape the markdown for safe embedding in the HTML template's <pre> element.
-    let escaped = markdown
-      .replacingOccurrences(of: "&", with: "&amp;")
-      .replacingOccurrences(of: "<", with: "&lt;")
-      .replacingOccurrences(of: ">", with: "&gt;")
-
-    return template.replacingOccurrences(of: "<!--MARKDOWN_SOURCE-->", with: escaped)
+  func renderedHTML(for markdown: String, isDarkMode: Bool) -> String {
+    var renderer = MarkdownToHTML(isDarkMode: isDarkMode)
+    return renderer.render(markdown)
   }
 }

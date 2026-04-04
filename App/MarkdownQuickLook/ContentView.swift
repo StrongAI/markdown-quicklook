@@ -7,7 +7,7 @@ struct ContentView: View {
         .font(.system(size: 64))
         .foregroundStyle(.secondary)
 
-      Text("Markdown QuickLook")
+      Text("Markdown QuickLook v2")
         .font(.title)
         .fontWeight(.semibold)
 

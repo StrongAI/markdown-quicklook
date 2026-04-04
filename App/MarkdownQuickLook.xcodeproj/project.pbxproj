@@ -145,6 +145,7 @@
 			);
 			name = PreviewExtension;
 			packageProductDependencies = (
+				B2000001 /* Markdown */,
 			);
 			productName = PreviewExtension;
 			productReference = A2000010 /* PreviewExtension.appex */;
@@ -181,6 +182,9 @@
 			productRefGroup = A9000001 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
+			packageReferences = (
+				B1000001 /* XCRemoteSwiftPackageReference "swift-markdown" */,
+			);
 			targets = (
 				A2000002 /* MarkdownQuickLook */,
 				A2000009 /* PreviewExtension */,
@@ -372,7 +376,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.xnn.MarkdownQuickLook;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.strong.Markdown.QuickLook;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -408,7 +412,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.xnn.MarkdownQuickLook;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.strong.Markdown.QuickLook;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator macosx";
@@ -439,7 +443,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.xnn.MarkdownQuickLook.PreviewExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.strong.Markdown.QuickLook.PreviewExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
@@ -471,7 +475,7 @@
 				);
 				MACOSX_DEPLOYMENT_TARGET = 14.0;
 				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.xnn.MarkdownQuickLook.PreviewExtension;
+				PRODUCT_BUNDLE_IDENTIFIER = ai.strong.Markdown.QuickLook.PreviewExtension;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SDKROOT = auto;
 				SKIP_INSTALL = YES;
@@ -514,6 +518,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		B1000001 /* XCRemoteSwiftPackageReference "swift-markdown" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/swiftlang/swift-markdown.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.4.0;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		B2000001 /* Markdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1000001 /* XCRemoteSwiftPackageReference "swift-markdown" */;
+			productName = Markdown;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = A4000001 /* Project object */;
 }
