@@ -1,0 +1,120 @@
+import githubBase from '../styles/themes/github/base.css?raw';
+import githubLight from '../styles/themes/github/light.css?raw';
+import githubDark from '../styles/themes/github/dark.css?raw';
+
+import cobaltDark from '../styles/themes/cobalt/dark.css?raw';
+import draculaDark from '../styles/themes/dracula/dark.css?raw';
+import minimalLight from '../styles/themes/minimal/light.css?raw';
+import minimalDark from '../styles/themes/minimal/dark.css?raw';
+import nightOwlDark from '../styles/themes/night-owl/dark.css?raw';
+import rosePineLight from '../styles/themes/rose-pine/light.css?raw';
+import rosePineDark from '../styles/themes/rose-pine/dark.css?raw';
+import solarizedLight from '../styles/themes/solarized/light.css?raw';
+import solarizedDark from '../styles/themes/solarized/dark.css?raw';
+import synthwave84Dark from '../styles/themes/synthwave84/dark.css?raw';
+import winterIsComingLight from '../styles/themes/winter-is-coming/light.css?raw';
+import winterIsComingDark from '../styles/themes/winter-is-coming/dark.css?raw';
+import xcodeLight from '../styles/themes/xcode/light.css?raw';
+import xcodeDark from '../styles/themes/xcode/dark.css?raw';
+
+import alertsBase from '../styles/alerts/base.css?raw';
+import alertsLight from '../styles/alerts/light.css?raw';
+import alertsDark from '../styles/alerts/dark.css?raw';
+
+import hljsBase from '../styles/hljs/base.css?raw';
+import hljsDark from '../styles/hljs/dark.css?raw';
+
+import codeCopyBase from '../styles/code-copy/base.css?raw';
+import codeCopyLight from '../styles/code-copy/light.css?raw';
+import codeCopyDark from '../styles/code-copy/dark.css?raw';
+
+export type ColorScheme = 'light' | 'dark' | 'auto';
+
+type ThemeVariants = { light?: string; dark?: string };
+
+const previewThemes: Record<string, ThemeVariants> = {
+  'github': { light: githubLight, dark: githubDark },
+  'cobalt': { dark: cobaltDark },
+  'dracula': { dark: draculaDark },
+  'minimal': { light: minimalLight, dark: minimalDark },
+  'night-owl': { dark: nightOwlDark },
+  'rose-pine': { light: rosePineLight, dark: rosePineDark },
+  'solarized': { light: solarizedLight, dark: solarizedDark },
+  'synthwave84': { dark: synthwave84Dark },
+  'winter-is-coming': { light: winterIsComingLight, dark: winterIsComingDark },
+  'xcode': { light: xcodeLight, dark: xcodeDark },
+};
+
+function extractBackgroundColor(css: string | undefined): string | undefined {
+  const match = css?.match(/--bgColor-default:\s*([^;]+);/);
+  return match?.[1]?.trim();
+}
+
+export function coreCss(themeName: string, colorScheme: ColorScheme = 'auto') {
+  const variants = previewThemes[themeName] ?? previewThemes['github'];
+  const lightVariant = variants.light ?? variants.dark;
+  const darkVariant = variants.dark ?? variants.light;
+  const lightBackground = extractBackgroundColor(lightVariant) ?? '#ffffff';
+  const darkBackground = extractBackgroundColor(darkVariant) ?? '#0d1117';
+
+  const styles = [
+    '.markdown-body { padding: 25px; }',
+    ...createCss(colorScheme, `body { background: ${lightBackground}; }`, `body { background: ${darkBackground}; }`),
+  ];
+
+  return styles.join('\n');
+}
+
+export function previewThemeCss(themeName: string, colorScheme: ColorScheme = 'auto') {
+  const variants = previewThemes[themeName] ?? previewThemes['github'];
+  const light = (variants.light ?? variants.dark) as string;
+  const dark = (variants.dark ?? variants.light) as string;
+
+  const styles = [
+    githubBase,
+    ...createCss(colorScheme, light, dark),
+  ];
+
+  return styles.join('\n');
+}
+
+export function alertsCss(colorScheme: ColorScheme = 'auto') {
+  const styles = [
+    alertsBase,
+    ...createCss(colorScheme, alertsLight, alertsDark),
+  ];
+
+  return styles.join('\n');
+}
+
+export function hljsCss(colorScheme: ColorScheme = 'auto') {
+  return createCss(colorScheme, hljsBase, hljsDark).join('\n');
+}
+
+export function codeCopyCss(colorScheme: ColorScheme = 'auto') {
+  const styles = [
+    codeCopyBase,
+    ...createCss(colorScheme, codeCopyLight, codeCopyDark),
+  ];
+
+  return styles.join('\n');
+}
+
+function createCss(colorScheme: ColorScheme, lightCss: string, darkCss: string): string[] {
+  const styles: string[] = [];
+  switch (colorScheme) {
+    case 'light': styles.push(lightCss); break;
+    case 'dark': styles.push(darkCss); break;
+    case 'auto':
+      styles.push(`
+        ${lightCss}
+        @media (prefers-color-scheme: dark) {
+          ${darkCss}
+        }`,
+      );
+      break;
+    default: break;
+  }
+
+  return styles;
+}
