@@ -9,8 +9,8 @@ struct MarkdownQuickLookApp: App {
     }
     .defaultSize(width: 480, height: 360)
     #else
-    WindowGroup {
-      ContentView()
+    DocumentGroup(viewing: MarkdownDocument.self) { file in
+      MarkdownDocumentView(document: file.$document)
     }
     #endif
   }

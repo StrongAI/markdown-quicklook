@@ -7,7 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		4DC37C872F81952F001941BC /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = B2000001 /* Markdown */; };
 		A1000001 /* PreviewExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = A2000010 /* PreviewExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		C1000001 /* Markdown in Frameworks */ = {isa = PBXBuildFile; productRef = C2000001 /* Markdown */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -15,7 +17,7 @@
 			isa = PBXContainerItemProxy;
 			containerPortal = A4000001 /* Project object */;
 			proxyType = 1;
-			remoteGlobalIDString = A2000009 /* PreviewExtension */;
+			remoteGlobalIDString = A2000009;
 			remoteInfo = PreviewExtension;
 		};
 /* End PBXContainerItemProxy section */
@@ -47,11 +49,21 @@
 			);
 			target = A2000009 /* PreviewExtension */;
 		};
+		A6000002 /* Exceptions for "MarkdownQuickLook" folder in "MarkdownQuickLook" target */ = {
+			isa = PBXFileSystemSynchronizedBuildFileExceptionSet;
+			membershipExceptions = (
+				Info.plist,
+			);
+			target = A2000002 /* MarkdownQuickLook */;
+		};
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		A7000001 /* MarkdownQuickLook */ = {
 			isa = PBXFileSystemSynchronizedRootGroup;
+			exceptions = (
+				A6000002 /* Exceptions for "MarkdownQuickLook" folder in "MarkdownQuickLook" target */,
+			);
 			path = MarkdownQuickLook;
 			sourceTree = "<group>";
 		};
@@ -63,6 +75,11 @@
 			path = PreviewExtension;
 			sourceTree = "<group>";
 		};
+		A7000003 /* Shared */ = {
+			isa = PBXFileSystemSynchronizedRootGroup;
+			path = Shared;
+			sourceTree = "<group>";
+		};
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -70,6 +87,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				C1000001 /* Markdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -77,6 +95,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				4DC37C872F81952F001941BC /* Markdown in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -92,9 +111,10 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		A9000002 /* Main group */ = {
+		A9000002 = {
 			isa = PBXGroup;
 			children = (
+				A7000003 /* Shared */,
 				A7000001 /* MarkdownQuickLook */,
 				A7000002 /* PreviewExtension */,
 				A9000001 /* Products */,
@@ -120,9 +140,11 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A7000001 /* MarkdownQuickLook */,
+				A7000003 /* Shared */,
 			);
 			name = MarkdownQuickLook;
 			packageProductDependencies = (
+				C2000001 /* Markdown */,
 			);
 			productName = MarkdownQuickLook;
 			productReference = A2000001 /* MarkdownQuickLook.app */;
@@ -142,6 +164,7 @@
 			);
 			fileSystemSynchronizedGroups = (
 				A7000002 /* PreviewExtension */,
+				A7000003 /* Shared */,
 			);
 			name = PreviewExtension;
 			packageProductDependencies = (
@@ -178,13 +201,13 @@
 			);
 			mainGroup = A9000002;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				B1000001 /* XCRemoteSwiftPackageReference "swift-markdown" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = A9000001 /* Products */;
 			projectDirPath = "";
 			projectRoot = "";
-			packageReferences = (
-				B1000001 /* XCRemoteSwiftPackageReference "swift-markdown" */,
-			);
 			targets = (
 				A2000002 /* MarkdownQuickLook */,
 				A2000009 /* PreviewExtension */,
@@ -359,9 +382,10 @@
 				CODE_SIGN_ENTITLEMENTS = MarkdownQuickLook/MarkdownQuickLook.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = CJN5CYF28H;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MarkdownQuickLook/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Markdown QuickLook";
 				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphonesimulator*]" = "Markdown QuickLook";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -395,9 +419,10 @@
 				CODE_SIGN_ENTITLEMENTS = MarkdownQuickLook/MarkdownQuickLook.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = CJN5CYF28H;
 				ENABLE_HARDENED_RUNTIME = YES;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = MarkdownQuickLook/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = "Markdown QuickLook";
 				"INFOPLIST_KEY_CFBundleDisplayName[sdk=iphonesimulator*]" = "Markdown QuickLook";
 				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.utilities";
@@ -429,7 +454,7 @@
 				CODE_SIGN_ENTITLEMENTS = PreviewExtension/PreviewExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = CJN5CYF28H;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PreviewExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PreviewExtension;
@@ -461,7 +486,7 @@
 				CODE_SIGN_ENTITLEMENTS = PreviewExtension/PreviewExtension.entitlements;
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = "";
+				DEVELOPMENT_TEAM = CJN5CYF28H;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = PreviewExtension/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = PreviewExtension;
@@ -532,6 +557,11 @@
 
 /* Begin XCSwiftPackageProductDependency section */
 		B2000001 /* Markdown */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = B1000001 /* XCRemoteSwiftPackageReference "swift-markdown" */;
+			productName = Markdown;
+		};
+		C2000001 /* Markdown */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = B1000001 /* XCRemoteSwiftPackageReference "swift-markdown" */;
 			productName = Markdown;

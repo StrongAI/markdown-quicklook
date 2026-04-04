@@ -28,7 +28,8 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
     let markdown = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) ?? ""
 
     let dark = view.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
-    let html = renderedHTML(for: markdown, isDarkMode: dark)
+    var renderer = MarkdownToHTML(isDarkMode: dark)
+    let html = renderer.render(markdown)
     webView.loadHTMLString(html, baseURL: fileURL.deletingLastPathComponent())
   }
 
@@ -71,7 +72,8 @@ final class PreviewViewController: UIViewController, QLPreviewingController {
     let markdown = String(data: data, encoding: .utf8) ?? String(data: data, encoding: .ascii) ?? ""
 
     let dark = traitCollection.userInterfaceStyle == .dark
-    let html = renderedHTML(for: markdown, isDarkMode: dark)
+    var renderer = MarkdownToHTML(isDarkMode: dark)
+    let html = renderer.render(markdown)
     webView.loadHTMLString(html, baseURL: fileURL.deletingLastPathComponent())
   }
 
@@ -87,12 +89,3 @@ final class PreviewViewController: UIViewController, QLPreviewingController {
   }
 }
 #endif
-
-// MARK: - Shared Rendering
-
-extension PreviewViewController {
-  func renderedHTML(for markdown: String, isDarkMode: Bool) -> String {
-    var renderer = MarkdownToHTML(isDarkMode: isDarkMode)
-    return renderer.render(markdown)
-  }
-}
