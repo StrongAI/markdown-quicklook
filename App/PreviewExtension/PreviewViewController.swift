@@ -4,11 +4,10 @@ import QuickLookUI
 import WebKit
 
 final class PreviewViewController: NSViewController, QLPreviewingController {
-  private static let sizeKey = "PreviewContentSize"
   // Zoom is a static preference set in the host app. The QL panel blocks
   // ALL input to extensions (keyboard, gestures, HTML clicks), so interactive
-  // zoom is not possible. The host app writes to the extension's preference
-  // domain and the extension reads from UserDefaults.standard.
+  // zoom is not possible. The host app writes to the shared app group and
+  // the extension reads it on each preview.
   private static let zoomKey = "PreviewZoomLevel"
 
   private lazy var webView: WKWebView = {
@@ -27,21 +26,6 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
     webView.frame = view.bounds
     webView.autoresizingMask = [.width, .height]
     view.addSubview(webView)
-
-    if let data = UserDefaults.standard.data(forKey: Self.sizeKey),
-       let size = try? JSONDecoder().decode(CGSize.self, from: data),
-       size.width > 0, size.height > 0 {
-      preferredContentSize = size
-    }
-  }
-
-  override func viewDidLayout() {
-    super.viewDidLayout()
-    let size = view.frame.size
-    guard size.width > 0, size.height > 0 else { return }
-    if let data = try? JSONEncoder().encode(size) {
-      UserDefaults.standard.set(data, forKey: Self.sizeKey)
-    }
   }
 
   private static let suiteName = "CJN5CYF28H.ai.strong.Markdown.QuickLook"
