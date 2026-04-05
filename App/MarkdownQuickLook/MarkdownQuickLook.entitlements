@@ -4,5 +4,9 @@
 <dict>
 	<key>com.apple.security.app-sandbox</key>
 	<true/>
+	<key>com.apple.security.application-groups</key>
+	<array>
+		<string>CJN5CYF28H.ai.strong.Markdown.QuickLook</string>
+	</array>
 </dict>
 </plist>

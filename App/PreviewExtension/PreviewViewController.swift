@@ -4,6 +4,13 @@ import QuickLookUI
 import WebKit
 
 final class PreviewViewController: NSViewController, QLPreviewingController {
+  private static let sizeKey = "PreviewContentSize"
+  // Zoom is a static preference set in the host app. The QL panel blocks
+  // ALL input to extensions (keyboard, gestures, HTML clicks), so interactive
+  // zoom is not possible. The host app writes to the extension's preference
+  // domain and the extension reads from UserDefaults.standard.
+  private static let zoomKey = "PreviewZoomLevel"
+
   private lazy var webView: WKWebView = {
     let config = WKWebViewConfiguration()
     let wv = WKWebView(frame: .zero, configuration: config)
@@ -20,6 +27,28 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
     webView.frame = view.bounds
     webView.autoresizingMask = [.width, .height]
     view.addSubview(webView)
+
+    if let data = UserDefaults.standard.data(forKey: Self.sizeKey),
+       let size = try? JSONDecoder().decode(CGSize.self, from: data),
+       size.width > 0, size.height > 0 {
+      preferredContentSize = size
+    }
+  }
+
+  override func viewDidLayout() {
+    super.viewDidLayout()
+    let size = view.frame.size
+    guard size.width > 0, size.height > 0 else { return }
+    if let data = try? JSONEncoder().encode(size) {
+      UserDefaults.standard.set(data, forKey: Self.sizeKey)
+    }
+  }
+
+  private static let suiteName = "CJN5CYF28H.ai.strong.Markdown.QuickLook"
+
+  private var zoomLevel: Double {
+    let zoom = UserDefaults(suiteName: Self.suiteName)?.double(forKey: Self.zoomKey) ?? 0
+    return zoom > 0 ? zoom : 1.0
   }
 
   func preparePreviewOfFile(at url: URL) async throws {
@@ -29,7 +58,9 @@ final class PreviewViewController: NSViewController, QLPreviewingController {
 
     let dark = view.effectiveAppearance.bestMatch(from: [.darkAqua, .aqua]) == .darkAqua
     var renderer = MarkdownToHTML(isDarkMode: dark)
-    let html = renderer.render(markdown)
+    let zoom = zoomLevel
+    let zoomCSS = zoom != 1.0 ? "body { zoom: \(zoom); }" : ""
+    let html = renderer.render(markdown).replacingOccurrences(of: "</style>", with: "\(zoomCSS)</style>")
     webView.loadHTMLString(html, baseURL: fileURL.deletingLastPathComponent())
   }
 
